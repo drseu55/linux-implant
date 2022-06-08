@@ -10,6 +10,8 @@ pub enum ImplantError {
     ArrayvecError,
     #[error("Bincode decode error")]
     BincodeError,
+    #[error("Local ip resolver error")]
+    LocalIpError,
 }
 
 impl std::convert::From<reqwest::Error> for ImplantError {
@@ -39,5 +41,11 @@ impl std::convert::From<arrayvec::ArrayVec<u8, 24_usize>> for ImplantError {
 impl std::convert::From<Box<bincode::ErrorKind>> for ImplantError {
     fn from(_err: Box<bincode::ErrorKind>) -> Self {
         ImplantError::BincodeError
+    }
+}
+
+impl std::convert::From<Box<local_ip_address::Error>> for ImplantError {
+    fn from(_err: Box<local_ip_address::Error>) -> Self {
+        ImplantError::LocalIpError
     }
 }
