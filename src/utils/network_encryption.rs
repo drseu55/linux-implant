@@ -2,6 +2,7 @@ use blake3;
 use chacha20poly1305::aead::{Aead, NewAead};
 use chacha20poly1305::{Key, XChaCha20Poly1305, XNonce};
 use rand::rngs::OsRng;
+use rand::RngCore;
 use x25519_dalek::{PublicKey, SharedSecret, StaticSecret};
 
 pub fn generate_keypair() -> (StaticSecret, PublicKey) {
@@ -36,4 +37,23 @@ pub fn xchacha20poly1305_decrypt_message(
         .expect("decryption failure");
 
     decrypted_message
+}
+
+pub fn xchacha20poly1305_encrypt_message(
+    blake3_hashed_key: &blake3::Hash,
+    message: &[u8],
+) -> (Vec<u8>, [u8; 24]) {
+    let key = Key::from_slice(blake3_hashed_key.as_bytes());
+    let aead = XChaCha20Poly1305::new(key);
+
+    // Generate random nonce
+    let mut rng = OsRng::default();
+    let mut nonce = [0u8; 24];
+    rng.fill_bytes(&mut nonce);
+
+    let xnonce = XNonce::from_slice(&nonce);
+
+    let ciphertext = aead.encrypt(xnonce, message).expect("Encryption failure");
+
+    (ciphertext, nonce)
 }

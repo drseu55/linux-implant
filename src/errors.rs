@@ -1,3 +1,5 @@
+use std::ffi::OsString;
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -12,6 +14,8 @@ pub enum ImplantError {
     BincodeError,
     #[error("Local ip resolver error")]
     LocalIpError,
+    #[error("Os String conversion error")]
+    OsStringError,
 }
 
 impl std::convert::From<reqwest::Error> for ImplantError {
@@ -44,8 +48,14 @@ impl std::convert::From<Box<bincode::ErrorKind>> for ImplantError {
     }
 }
 
-impl std::convert::From<Box<local_ip_address::Error>> for ImplantError {
-    fn from(_err: Box<local_ip_address::Error>) -> Self {
+impl std::convert::From<local_ip_address::Error> for ImplantError {
+    fn from(_err: local_ip_address::Error) -> Self {
         ImplantError::LocalIpError
+    }
+}
+
+impl std::convert::From<OsString> for ImplantError {
+    fn from(_err: OsString) -> Self {
+        ImplantError::OsStringError
     }
 }

