@@ -11,7 +11,7 @@ pub struct SystemInfo {
     pub process_name: String,
     pub pid: u32,
     pub architecture: String,
-    pub implant_id: String,
+    pub implant_id: uuid::Uuid,
 }
 
 impl SystemInfo {
@@ -24,7 +24,7 @@ impl SystemInfo {
         process_name: String,
         pid: u32,
         architecture: String,
-        implant_id: String,
+        implant_id: uuid::Uuid,
     ) -> Self {
         SystemInfo {
             external_ip_address,

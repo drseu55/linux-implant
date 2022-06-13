@@ -42,6 +42,12 @@ impl std::convert::From<arrayvec::ArrayVec<u8, 24_usize>> for ImplantError {
     }
 }
 
+impl std::convert::From<arrayvec::ArrayVec<u8, 16_usize>> for ImplantError {
+    fn from(_err: arrayvec::ArrayVec<u8, 16_usize>) -> Self {
+        ImplantError::ArrayvecError
+    }
+}
+
 impl std::convert::From<Box<bincode::ErrorKind>> for ImplantError {
     fn from(_err: Box<bincode::ErrorKind>) -> Self {
         ImplantError::BincodeError
