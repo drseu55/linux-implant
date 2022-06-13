@@ -121,9 +121,12 @@ where
     // Base64 encode nonce
     let base64_nonce = base64::encode(nonce);
 
+    // Base64 encode implant id
+    let base64_implant_id = base64::encode(implant_id);
+
     let response = format!(
         "{}\n{}\n{}",
-        base64_encrypted_message, base64_nonce, implant_id
+        base64_encrypted_message, base64_nonce, base64_implant_id
     );
 
     response
