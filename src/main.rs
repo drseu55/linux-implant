@@ -12,7 +12,7 @@ mod utils;
 pub const PROTOCOL: &str = "http";
 pub const HOST: &str = "localhost";
 pub const PORT: &str = "8080";
-const CHECK_IN_TIME_SECONDS: u64 = 60;
+const CHECK_IN_TIME_SECONDS: u64 = 30;
 
 fn main() -> Result<(), errors::ImplantError> {
     // Check if server is up and running

@@ -1,5 +1,4 @@
 use serde::Serialize;
-use uuid;
 
 #[derive(Debug, Serialize)]
 pub struct SystemInfo {
@@ -9,9 +8,9 @@ pub struct SystemInfo {
     pub machine_user: String,
     pub machine_name: String,
     pub process_name: String,
-    pub pid: u32,
+    pub pid: i32,
     pub architecture: String,
-    pub implant_id: uuid::Uuid,
+    pub implant_id: String,
 }
 
 impl SystemInfo {
@@ -22,9 +21,9 @@ impl SystemInfo {
         machine_user: String,
         machine_name: String,
         process_name: String,
-        pid: u32,
+        pid: i32,
         architecture: String,
-        implant_id: uuid::Uuid,
+        implant_id: String,
     ) -> Self {
         SystemInfo {
             external_ip_address,
