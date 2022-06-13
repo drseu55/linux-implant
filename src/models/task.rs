@@ -7,8 +7,6 @@ use uuid;
 pub struct Task {
     pub task_id: uuid::Uuid,
     pub task: String,
-    pub created_at: chrono::NaiveDateTime,
-    pub status: String,
     pub implant_id: uuid::Uuid,
 }
 

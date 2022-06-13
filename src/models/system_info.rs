@@ -11,7 +11,6 @@ pub struct SystemInfo {
     pub process_name: String,
     pub pid: u32,
     pub architecture: String,
-    pub task_id: String,
     pub implant_id: String,
 }
 
@@ -25,7 +24,6 @@ impl SystemInfo {
         process_name: String,
         pid: u32,
         architecture: String,
-        task_id: String,
         implant_id: String,
     ) -> Self {
         SystemInfo {
@@ -37,7 +35,6 @@ impl SystemInfo {
             process_name,
             pid,
             architecture,
-            task_id,
             implant_id,
         }
     }
