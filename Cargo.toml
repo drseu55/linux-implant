@@ -21,3 +21,4 @@ uuid = { version = "0.8.2", features = ["serde", "v4"] }
 local-ip-address = "0"
 users = "0"
 gethostname = "0"
+daemonize = "0"

