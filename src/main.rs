@@ -33,7 +33,7 @@ fn main() -> Result<(), errors::ImplantError> {
             &exchange_response.implant_id,
             &keypair.0,
             &exchange_response.public_key,
-        );
+        )?;
 
         // Sleep
         let check_in_duration = time::Duration::from_secs(CHECK_IN_TIME_SECONDS);
