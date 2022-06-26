@@ -18,6 +18,8 @@ pub enum ImplantError {
     OsStringError,
     #[error("Error while executing command")]
     CommandError,
+    #[error("String to int parse error")]
+    ParseError,
 }
 
 impl std::convert::From<reqwest::Error> for ImplantError {

