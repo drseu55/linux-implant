@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-reqwest = { version = "0", features = ["blocking", "json"] }
+reqwest = { version = "0", features = ["blocking", "json", "multipart"] }
 serde = { version = "1", features = ["derive"] }
 x25519-dalek = "1"
 blake3 = "1"
@@ -23,3 +23,5 @@ users = "0"
 gethostname = "0"
 daemonize = "0"
 execute = "0"
+scrap = "0"
+eye = "0.4.1"

